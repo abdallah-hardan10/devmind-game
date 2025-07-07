@@ -22,6 +22,12 @@ public class GameService {
     private final AnswerRepository answerRepository;
 
     public StartGameRes startNewGame(String name, int difficulty) {
+        Random random = new Random();
+
+        if (difficulty == 0) {
+            difficulty = random.nextInt(3) + 1;
+        }
+
         Game game = new Game();
         game.setPlayerName(name);
         game.setDifficulty(difficulty);
@@ -159,7 +165,7 @@ public class GameService {
                 equation.append(number);
                 first = false;
             } else {
-                char operator = "+-*/".charAt(random.nextInt(4));
+                char operator = "+-*/^".charAt(random.nextInt(5));
                 equation.append(" ").append(operator).append(" ").append(number);
                 result = calculate(result, number, operator);
             }
@@ -172,12 +178,19 @@ public class GameService {
     }
 
     private float calculate(float a, float b, char operator) {
-        return switch (operator) {
+        float result = switch (operator) {
             case '+' -> a + b;
             case '-' -> a - b;
             case '*' -> a * b;
-            case '/' -> b != 0 ? a / b : a;
-            default -> a;
+            case '/' -> b != 0 ? a / b : 0;
+            case '^' -> (float) Math.pow(a, b);
+            default -> 0;
         };
+
+        if (Float.isInfinite(result) || Float.isNaN(result)) {
+            result = 0;
+        }
+
+        return result;
     }
 }
